@@ -1,0 +1,24 @@
+[ req ]
+default_bits       = 2048
+distinguished_name = req_distinguished_name
+req_extensions     = req_ext
+x509_extensions    = v3_req
+prompt             = no
+
+[ req_distinguished_name ]
+C  = ID
+ST = Jakarta
+L  = Jakarta
+O  = BankApp Ltd
+OU = IT
+CN = bankapp.local
+
+[ req_ext ]
+subjectAltName = @alt_names
+
+[ v3_req ]
+subjectAltName = @alt_names
+
+[ alt_names ]
+DNS.1 = bankapp.local
+
