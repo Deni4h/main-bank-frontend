@@ -76,3 +76,7 @@
 192.168.1.100 - - [16/Nov/2025:06:13:10 +0000] "GET /favicon.ico HTTP/2.0" 200 786 "https://denibankapp.com:4444/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36"
 192.168.1.100 - - [16/Nov/2025:06:13:20 +0000] "POST /api/setor HTTP/2.0" 200 29 "https://denibankapp.com:4444/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36"
 192.168.1.100 - - [16/Nov/2025:06:13:20 +0000] "GET /api/saldo HTTP/2.0" 200 29 "https://denibankapp.com:4444/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36"
+192.168.1.100 - - [16/Nov/2025:06:38:06 +0000] "GET / HTTP/2.0" 200 786 "-" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36"
+192.168.1.100 - - [16/Nov/2025:06:38:06 +0000] "GET /app.js HTTP/2.0" 200 1099 "https://denibankapp.com:4444/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36"
+192.168.1.100 - - [16/Nov/2025:06:38:06 +0000] "GET /api/saldo HTTP/2.0" 200 29 "https://denibankapp.com:4444/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36"
+192.168.1.100 - - [16/Nov/2025:06:38:06 +0000] "GET /favicon.ico HTTP/2.0" 200 786 "https://denibankapp.com:4444/" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36"

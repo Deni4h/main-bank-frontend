@@ -1,0 +1,100 @@
+// Pipeline Declarative untuk CI/CD aplikasi Docker (Deployment Lokal)
+pipeline {
+    // Tentukan agen/runner tempat pipeline akan dieksekusi.
+    // Menggunakan 'any' berarti Jenkins akan menggunakan salah satu agen yang tersedia.
+    agent any
+
+    // Variabel lingkungan yang dapat disesuaikan
+    environment {
+        // [GANTI] Nama image yang akan dibangun.
+        APP_NAME = 'main-bank'
+        // [GANTI] Username Docker Hub Anda.
+        DOCKER_USER = 'denidkr24'
+        // ID Kredensial Docker Hub yang disimpan di Jenkins.
+        DOCKER_CRED_ID = 'docker-hub-credentials'
+        
+        // Tag image yang unik (berdasarkan ID build Jenkins)
+        IMAGE_TAG = "${DOCKER_USER}/${APP_NAME}:${env.BUILD_ID}"
+        // Tag 'latest' untuk penanda versi terbaru
+        LATEST_TAG = "${DOCKER_USER}/${APP_NAME}:latest"
+    }
+
+    stages {
+        // --- TAHAP 1: BUILD DOCKER IMAGE ---
+        stage('1. Build Docker Image') {
+            steps {
+                echo "Memulai tahapan Build untuk Image: ${IMAGE_TAG}"
+                
+                script {
+                    // Membersihkan image lama (opsional, untuk memastikan build bersih)
+                    sh "docker image rm -f ${IMAGE_TAG} || true"
+                    
+                    // Melakukan proses build dan tagging. 
+                    // Menggunakan '.' untuk Dockerfile di direktori saat ini.
+                    sh "docker build -t ${IMAGE_TAG} -t ${LATEST_TAG} ."
+                    echo "Build Image Selesai: ${IMAGE_TAG} dan ${LATEST_TAG}"
+                }
+            }
+        }
+
+        // --- TAHAP 2: PUSH DOCKER IMAGE KE DOCKER HUB ---
+        stage('2. Push to Docker Hub') {
+            steps {
+                echo "Memulai tahapan Push ke Docker Hub..."
+                
+                // Menggunakan withCredentials untuk login ke Docker Hub secara aman
+                withCredentials([usernamePassword(credentialsId: DOCKER_CRED_ID, 
+                                                 passwordVariable: 'DOCKER_PASSWORD', 
+                                                 usernameVariable: 'DOCKER_USERNAME')]) {
+                    script {
+                        // Login ke Docker Hub menggunakan kredensial
+                        sh "echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin"
+                        
+                        // Push kedua tag (ID Build dan latest)
+                        sh "docker push ${IMAGE_TAG}"
+                        echo "Image ${IMAGE_TAG} berhasil di-push."
+                        sh "docker push ${LATEST_TAG}"
+                        echo "Image ${LATEST_TAG} berhasil di-push."
+
+                        // Logout dari Docker Hub
+                        sh "docker logout"
+                    }
+                }
+            }
+        }
+
+        // --- TAHAP 3: DEPLOY DOCKER IMAGE SECARA LOKAL ---
+        stage('3. Deploy Application Locally') {
+            steps {
+                echo "Memulai tahapan Deploy Lokal. Kontainer lama akan dihentikan dan diganti..."
+                
+                // Perintah dijalankan secara lokal di server yang sama dengan Jenkins.
+                sh """
+                    echo "Menghentikan dan menghapus kontainer lama: ${APP_NAME}..."
+                    # Hentikan dan hapus kontainer lama (mengabaikan error jika kontainer tidak ada)
+                    docker stop ${APP_NAME} || true
+                    docker rm ${APP_NAME} || true
+
+                    echo "Menjalankan kontainer baru dari image terbaru: ${LATEST_TAG}"
+                    # Jalankan kontainer baru dengan konfigurasi dasar
+              
+                    docker run -d -p 8888:80 -p 4444:443 --name ${APP_NAME} -v ./certs:/etc/nginx/certs:ro -v ./logs_nginx:/var/log/nginx ${LATEST_TAG}    
+                    echo "Deployment Lokal Selesai. Aplikasi berjalan di port 8888 untuk http dan 4444 untuk https."
+                """
+            }
+        }
+    }
+    
+    // Blok Post: Selalu dijalankan setelah semua stage selesai.
+    post {
+        always {
+            echo 'Pipeline CI/CD Selesai.'
+        }
+        success {
+            echo 'Deployment Berhasil! Image terbaru sudah berjalan secara lokal.'
+        }
+        failure {
+            echo 'Pipeline GAGAL. Periksa log build dan pastikan user Jenkins memiliki akses Docker.'
+        }
+    }
+}
